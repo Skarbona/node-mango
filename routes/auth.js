@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
 const express = require('express');
 const Joi = require('joi');
+
 const { compareHash } = require('../db/hash');
 
 const { Model, emailRegex } = require('../models/users');
@@ -13,14 +13,13 @@ router.post('/', async (req, res) => {
 
     try {
         const { email, password } = req.body;
-        const userAlreadyExist = await Model.findOne({ email });
-        if (!userAlreadyExist) return res.status(400).send('Invalid email or password');
+        const user = await Model.findOne({ email });
+        if (!user) return res.status(400).send('Invalid email or password');
 
-        const passIsValid = await compareHash(password, userAlreadyExist.password);
+        const passIsValid = await compareHash(password, user.password);
         if (!passIsValid) return res.status(400).send('Invalid email or password');
 
-        const token = jwt.sign({ _id: userAlreadyExist.id }, 'jwtPrivateKey');
-
+        const token = user.generateAuthToken();
         res.send(token);
 
     } catch (e) {

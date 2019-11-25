@@ -1,6 +1,8 @@
 const express = require('express');
 
-const {Model, validation} = require('../models/genres');
+const { Model, validation } = require('../models/genres');
+const authChecker = require('../middleware/auth');
+const isAdmin = require('../middleware/admin');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -8,11 +10,11 @@ router.get('/', async (req, res) => {
     res.send(genres);
 });
 
-router.post('/', async (req, res) => {
-    const {error} = validation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+router.post('/', authChecker, async (req, res) => {
+    const { error } = validation(req.body);
+    if (error) return res.status(400).send(error.details[ 0 ].message);
 
-    const genre = new Model({name: req.body.name});
+    const genre = new Model({ name: req.body.name });
     try {
         const result = await genre.save();
         res.send(result);
@@ -22,11 +24,11 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-    const {error} = validation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    const { error } = validation(req.body);
+    if (error) return res.status(400).send(error.details[ 0 ].message);
 
     try {
-        const result = await Model.update({_id: req.params.id}, {
+        const result = await Model.update({ _id: req.params.id }, {
             $set: {
                 name: req.body.name,
             }
@@ -37,9 +39,9 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [ authChecker, isAdmin ], async (req, res) => {
     try {
-        const result = await Model.deleteOne({_id: req.params.id});
+        const result = await Model.deleteOne({ _id: req.params.id });
         res.send(result)
     } catch (e) {
         res.send(e.message)
@@ -48,7 +50,7 @@ router.delete('/:id', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const genre = await Model.findOne({_id: req.params.id});
+        const genre = await Model.findOne({ _id: req.params.id });
         res.send(genre);
     } catch (e) {
         res.send(e.message)

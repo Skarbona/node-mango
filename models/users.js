@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const config = require('config');
+const jwt = require('jsonwebtoken');
 
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -19,14 +21,24 @@ const Schema = new mongoose.Schema({
         trim: true,
         lowercase: true,
         required: 'Email address is required',
-        validate: [validateEmail, 'Please fill a valid email address'],
+        validate: [ validateEmail, 'Please fill a valid email address' ],
     },
+    isAdmin: Boolean,
     password: {
         type: String,
         minlength: 5,
         maxlength: 1024
     }
 });
+
+Schema.methods.generateAuthToken = function () {
+    return jwt.sign(
+        {
+            _id: this.id,
+            isAdmin: this.isAdmin
+        },
+        config.get('jwtPrivateKey'));
+};
 
 const Model = new mongoose.model('Users', Schema);
 
