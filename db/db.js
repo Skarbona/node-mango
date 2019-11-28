@@ -5,7 +5,7 @@ const mongoOptions = {
     useNewUrlParser: true
 };
 
-const dbConnection = mongoose.connect('mongodb://localhost/playground', mongoOptions)
+const dbConnection = () => mongoose.connect('mongodb://localhost/playground', mongoOptions)
     .then(() => console.log('connected to MongoDb...'))
     .catch(e => console.log('cannot connect to MongoDb', e));
 
