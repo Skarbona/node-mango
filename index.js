@@ -7,5 +7,7 @@ require('./startup/routes')(app);
 require('./db/db')();
 require('./startup/config')();
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+const port = process.env.PORT || 3004;
+const server = app.listen(port, () => console.log(`Listening on port ${port}...`));
+
+module.exports = server;

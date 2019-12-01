@@ -1,5 +1,5 @@
 const express = require('express');
-
+const validateObjectId = require('../middleware/validateObjectId');
 const { Model, validation } = require('../models/genres');
 const authChecker = require('../middleware/auth');
 const isAdmin = require('../middleware/admin');
@@ -43,9 +43,10 @@ router.delete('/:id', [ authChecker, isAdmin ], async (req, res) => {
 
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
 
-    const genre = await Model.findOne({ _id: req.params.id });
+    const genre = await Model.findById(req.params.id);
+    if (!genre) return res.status(404).send('The genre with the given ID do not exist');
     res.send(genre);
 
 });
